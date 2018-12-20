@@ -882,6 +882,7 @@ public class XPlaneConnect implements AutoCloseable
      */
     public void sendCOMM(String comm) throws IOException
     {
+    /*
         //Preconditions
         if(comm == null || comm.length() == 0)
         {
@@ -907,8 +908,58 @@ public class XPlaneConnect implements AutoCloseable
         os.write(commBytes.length);
         os.write(commBytes);
         sendUDP(os.toByteArray());
+    */
+        sendCOMMs(new String[] {comm});
     }
 
+    /**
+     * Send multiple commands to X-Plane.
+     *
+     * @param comms The array of the X-Plane command to send.
+     * @throws IOException If the commands cannot be sent.
+     */
+    public void sendCOMMs(String[] comms) throws IOException
+    {
+        //Preconditions
+        if(comms == null || comms.length == 0)
+        {
+            throw new IllegalArgumentException(("comms must be non-empty."));
+        }
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        os.write("COMM".getBytes(StandardCharsets.UTF_8));
+        os.write(0xFF); //Placeholder for message length
+
+        //Go over all comms to write them to output stream
+        for(int i = 0; i < comms.length; ++i)
+        {
+            String comm = comms[i];
+            
+            if (comm == null)
+            {
+                throw new IllegalArgumentException("comm must be a valid string.");
+            }
+            
+            //Convert comm to bytes.
+            byte[] commBytes = comm.getBytes(StandardCharsets.UTF_8);
+            if (commBytes.length == 0)
+            {
+                throw new IllegalArgumentException("COMM is an empty string!");
+            }
+            if (commBytes.length > 255)
+            {
+                throw new IllegalArgumentException("A single comm must be less than 255 bytes in UTF-8. Are you sure this is a valid comm?");
+            }
+            
+            //Write to byte array output stream
+            os.write(commBytes.length);
+            os.write(commBytes, 0, commBytes.length);
+        }
+        
+        //Send message
+        sendUDP(os.toByteArray());
+    }
+    
     /**
      * Sets the port on which the client will receive data from X-Plane.
      *
