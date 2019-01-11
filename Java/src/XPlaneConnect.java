@@ -882,7 +882,6 @@ public class XPlaneConnect implements AutoCloseable
      */
     public void sendCOMM(String comm) throws IOException
     {
-    /*
         //Preconditions
         if(comm == null || comm.length() == 0)
         {
@@ -908,8 +907,6 @@ public class XPlaneConnect implements AutoCloseable
         os.write(commBytes.length);
         os.write(commBytes);
         sendUDP(os.toByteArray());
-    */
-        sendCOMMs(new String[] {comm});
     }
 
     /**
